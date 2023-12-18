@@ -12,6 +12,11 @@
                         <span class="label label-default">{{ g.genre }}</span>
                     {% endfor %}
                 </p>
+                <p>
+                    {% for t in m.tags %}
+                        <span class="label label-default">{{ t.tag }}</span>
+                    {% endfor %}
+                </p>
             </div>
               <div class="panel-footer">Rate:
                   <a href="#" class="card-link">1</a>
