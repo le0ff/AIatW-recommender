@@ -1,6 +1,6 @@
 import csv
 from sqlalchemy.exc import IntegrityError
-from models import Movie, MovieGenre
+from models import Movie, MovieGenre, Link, Tag
 
 def check_and_read_data(db):
     # check if we have movies in the database
@@ -29,4 +29,57 @@ def check_and_read_data(db):
                 count += 1
                 if count % 100 == 0:
                     print(count, " movies read")
+    
+    #check if we have links in the database
+    #read data if database is empty
+    if Link.query.count() == 0:
+        # read links from csv
+        with open('data/links.csv', newline='', encoding='utf8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            count = 0
+            for row in reader:
+                if count > 0:
+                    try:
+                        id = row[0]
+                        imdb = row[1]
+                        tmdb = row[2]
+                        links = Link(id=id, imdb=imdb, tmdb=tmdb)
+                        # add links and save to database
+                        db.session.add(links)
+                        db.session.commit()
+                    except IntegrityError:
+                        print(f"Error: {id}, imdb: {imdb}, tmdb: {tmdb}")
+                        db.session.rollback()
+                        pass
+                count += 1
+                if count % 100 == 0:
+                    print(count, " links read")
+    
+    #check if we have tags in the database
+    #read data if database is empty
+    if Tag.query.count() == 0:
+        #read tags from csv
+        with open('data/tags.csv', newline='', encoding='utf8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            count = 0
+            for row in reader:
+                if count > 0:
+                    try:
+                        userID = row[0]
+                        movieID = row[1]
+                        tag = row[2]
+                        tags = Tag(user_id = userID, movie_id = movieID, tag = tag)
+                        #add tags and save to database
+                        db.session.add(tags)
+                        db.session.commit()
+                    except IntegrityError:
+                        print(f"Error: user: {userID}, movie: {movieID}, tag: {tag}")
+                        db.session.rollback()
+                        pass
+                count += 1
+                if count % 100 == 0:
+                    print(count, " tags read")
+
+
+
 
