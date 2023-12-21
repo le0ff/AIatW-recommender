@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.schema import UniqueConstraint
 from flask_user import UserMixin
 
 db = SQLAlchemy()
@@ -28,6 +27,7 @@ class Movie(db.Model):
     title = db.Column(db.String(100, collation='NOCASE'), nullable=False, unique=True)
     genres = db.relationship('MovieGenre', backref='movie', lazy=True)
     tags = db.relationship('Tag', backref='movie', lazy=True)
+    links = db.relationship('Link', backref='movie', lazy=True)
 
 class MovieGenre(db.Model):
     __tablename__ = 'movie_genres'
@@ -38,6 +38,7 @@ class MovieGenre(db.Model):
 class Link(db.Model):
     __tablename__ = 'links'
     id = db.Column(db.Integer, primary_key=True)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=False)
     imdb = db.Column(db.String(50), nullable=False, server_default='', unique=True)
     tmdb = db.Column(db.String(50), nullable=False, server_default='', unique=True)
 
@@ -50,5 +51,5 @@ class Tag(db.Model):
     tag = db.Column(db.String(255), nullable=False, server_default='')
 
     __table_args__ = (
-        UniqueConstraint('movie_id', 'tag', name='unique_movie_tag'),
+        db.UniqueConstraint('movie_id', 'tag', name='unique_movie_tag'),
     )

@@ -7,26 +7,40 @@
         <div class="panel panel-default">
             <div class="panel-heading"><b>{{ m.title }}</b></div>
             <div class="panel-body">
-                <p>
-                    {% for g in m.genres %}
-                        <span class="label label-default">{{ g.genre }}</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {% for t in m.tags %}
-                        <span class="label label-default">{{ t.tag }}</span>
-                    {% endfor %}
-                </p>
+                <div class="col-md-11">
+                    <p>
+                        {% for g in m.genres %}
+                            <span class="label label-default">{{ g.genre }}</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {% for t in m.tags %}
+                            <span class="label label-default">{{ t.tag }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <!--a href="https://movielens.org/movies/{{m.links[0].movie_id}}">
+                        <img src="https://th.bing.com/th?id=ODLS.872d2baf-7095-409f-9e3f-e7bf5c878a64&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2" width="50%" height="50%" alt="MovieLens">
+                    </a-->
+                    <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
+                        <img src="https://img.icons8.com/color/48/000000/imdb.png" width="50%" height="50%" alt="IMDB">
+                    </a>
+                    <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
+                        <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="50%" height="50%" alt="TMDB">
+                    </a>
+                </div>
             </div>
-              <div class="panel-footer">Rate:
-                  <a href="#" class="card-link">1</a>
-                  <a href="#" class="card-link">2</a>
-                  <a href="#" class="card-link">3</a>
-                  <a href="#" class="card-link">4</a>
-                  <a href="#" class="card-link">5</a> Stars
-              </div>
+            <div class="panel-footer">Rate:
+                <a href="#" class="card-link">1</a>
+                <a href="#" class="card-link">2</a>
+                <a href="#" class="card-link">3</a>
+                <a href="#" class="card-link">4</a>
+                <a href="#" class="card-link">5</a> Stars
+            </div>
         </div>
     {% endfor %}
+
 </div>
 
 {% endblock %}

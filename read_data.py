@@ -7,7 +7,7 @@ def check_and_read_data(db):
     # read data if database is empty
     if Movie.query.count() == 0:
         # read movies from csv
-        with open('data/movies.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/subdata/movies.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
@@ -34,21 +34,21 @@ def check_and_read_data(db):
     #read data if database is empty
     if Link.query.count() == 0:
         # read links from csv
-        with open('data/links.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/subdata/links.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
                 if count > 0:
                     try:
-                        id = row[0]
+                        movieID = row[0]
                         imdb = row[1]
                         tmdb = row[2]
-                        links = Link(id=id, imdb=imdb, tmdb=tmdb)
+                        links = Link(movie_id=movieID, imdb=imdb, tmdb=tmdb)
                         # add links and save to database
                         db.session.add(links)
                         db.session.commit()
                     except IntegrityError:
-                        print(f"Error: {id}, imdb: {imdb}, tmdb: {tmdb}")
+                        print(f"Error: {movieID}, imdb: {imdb}, tmdb: {tmdb}")
                         db.session.rollback()
                         pass
                 count += 1
@@ -59,7 +59,7 @@ def check_and_read_data(db):
     #read data if database is empty
     if Tag.query.count() == 0:
         #read tags from csv
-        with open('data/tags.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/subdata/tags.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
