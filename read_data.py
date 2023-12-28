@@ -1,13 +1,13 @@
 import csv
 from sqlalchemy.exc import IntegrityError
-from models import Movie, MovieGenre, Link, Tag
+from models import Movie, MovieGenre, Link, Tag, Rating, User
 
 def check_and_read_data(db):
     # check if we have movies in the database
     # read data if database is empty
     if Movie.query.count() == 0:
         # read movies from csv
-        with open('data/subdata/movies.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/movies.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
@@ -34,7 +34,7 @@ def check_and_read_data(db):
     #read data if database is empty
     if Link.query.count() == 0:
         # read links from csv
-        with open('data/subdata/links.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/links.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
@@ -59,7 +59,7 @@ def check_and_read_data(db):
     #read data if database is empty
     if Tag.query.count() == 0:
         #read tags from csv
-        with open('data/subdata/tags.csv', newline='', encoding='utf8') as csvfile:
+        with open('data/tags.csv', newline='', encoding='utf8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             count = 0
             for row in reader:
@@ -79,7 +79,52 @@ def check_and_read_data(db):
                 count += 1
                 if count % 100 == 0:
                     print(count, " tags read")
-
-
-
-
+    
+    #check if we have ratings in the database
+    #read data if database is empty
+    
+    #set for userIDs
+    userIDs = set()
+    if Rating.query.count() == 0:
+        #read ratings from csv
+        with open('data/ratings.csv', newline='', encoding='utf8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            count = 0
+            for row in reader:
+                if count > 0:
+                    try:
+                        userID = row[0]
+                        userIDs.add(userID)
+                        movieID = row[1]
+                        rating = row[2]
+                        ratings = Rating(user_id = userID, movie_id = movieID, rating = rating)
+                        #add ratings and save to database
+                        db.session.add(ratings)
+                        db.session.commit()
+                    except IntegrityError:
+                        print(f"Error: user: {userID}, movie: {movieID}, rating: {rating}")
+                        db.session.rollback()
+                        pass
+                count += 1
+                if count % 100 == 0:
+                    print(count, " ratings read")
+    
+    #check if we have users in the database
+    #read data if database is empty
+    if User.query.count() == 0:
+        count = 0
+        for userID in userIDs:
+            try:
+                #maybe different username and encoded password already?
+                users = User(id=userID, username='user'+str(userID), password='Passw0rd!')
+                db.session.add(users)
+                db.session.commit()
+            except IntegrityError:
+                print(f"Error: user: {userID}")
+                db.session.rollback()
+                pass
+            count += 1
+            if count % 100 == 0:
+                print(count, " users read")
+        
+        
