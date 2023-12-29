@@ -2,7 +2,6 @@
 
 from flask import Flask, render_template, request
 from flask_user import login_required, UserManager, current_user
-from sqlalchemy import update
 
 from models import db, User, Movie, Rating
 from read_data import check_and_read_data
@@ -40,6 +39,15 @@ def initdb_command():
     check_and_read_data(db)
     print('Initialized the database.')
 
+
+#template filter, to apply this function to a movie in the jinja2 template
+@app.template_filter('get_rating')
+def get_rating(movie):
+    #get first (here only one value possible) rating of Rating where movie_id and current_user are matching to the current movie
+    user_rating = Rating.query.filter_by(movie_id=movie.id, user_id=current_user.id).first()
+    #return user_rating or 0.0
+    return user_rating.rating if user_rating else 0.0
+
 # The Home page is accessible to anyone
 @app.route('/')
 def home_page():
@@ -51,7 +59,6 @@ def home_page():
 @app.route('/movies')
 @login_required  # User must be authenticated
 def movies_page():
-    user = current_user.id
     # String-based templates
 
     # first 10 movies
