@@ -1,9 +1,10 @@
 # Contains parts from: https://flask-user.readthedocs.io/en/latest/quickstart_app.html
 
-from flask import Flask, render_template
-from flask_user import login_required, UserManager
+from flask import Flask, render_template, request
+from flask_user import login_required, UserManager, current_user
+from sqlalchemy import update
 
-from models import db, User, Movie, MovieGenre
+from models import db, User, Movie, Rating
 from read_data import check_and_read_data
 
 # Class-based application configuration
@@ -50,6 +51,7 @@ def home_page():
 @app.route('/movies')
 @login_required  # User must be authenticated
 def movies_page():
+    user = current_user.id
     # String-based templates
 
     # first 10 movies
@@ -66,6 +68,31 @@ def movies_page():
 
     return render_template("movies.html", movies=movies)
 
+
+@app.route('/rate', methods=['POST'])
+@login_required  # User must be authenticated
+def rate():
+    #get movieid, rating, and current_user
+    movieid = request.form.get('movieid')
+    rating = request.form.get('rating')
+    userid = current_user.id
+
+    #query to check whether there is already a rating for current user and movieid
+    q = db.session.query(Rating).filter((Rating.user_id == userid) & (Rating.movie_id == movieid))
+    if db.session.query(q.exists()).scalar():
+        #overwrite Rating WHERE user = current_user and movie = current_movie to rating
+        db.session.query(Rating).filter((Rating.user_id == userid) & (Rating.movie_id == movieid)).update({"rating": rating})
+        db.session.commit()
+    else:
+        #create new rating
+        db.session.add(Rating(user_id=userid, movie_id=movieid, rating=rating))
+        db.session.commit()
+
+    #console output for now
+    print("Rate {} for {} by {}".format(rating, movieid, userid))
+
+    return ("nothing?")
+    #return render_template("rated.html", rating=rating)
 
 # Start development web server
 if __name__ == '__main__':
