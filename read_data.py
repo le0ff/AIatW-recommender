@@ -15,7 +15,7 @@ def check_and_read_data(db):
                     try:
                         id = row[0]
                         title = row[1]
-                        movie = Movie(id=id, title=title)
+                        movie = Movie(id=id, title=title, ratingCount=0)
                         db.session.add(movie)
                         genres = row[2].split('|')  # genres is a list of genres
                         for genre in genres:  # add each genre to the movie_genre table
@@ -126,5 +126,21 @@ def check_and_read_data(db):
             count += 1
             if count % 100 == 0:
                 print(count, " users read")
+    
+
+    #initialize the amount of ratings that exists for the movies
+    movies = Movie.query.all()
+    count = 0
+
+    #iterate over all movies
+    for movie in movies:
+        count += 1
+        #all ratings for current movie
+        current_ratings = Rating.query\
+                        .filter(Rating.movie_id == movie.id).all()
         
-        
+        ratingCount = len(current_ratings)
+        db.session.query(Movie).filter(Movie.id == movie.id).update({"ratingCount": ratingCount})
+
+        if count % 100 == 0:
+            print(count, " rating counts read")
