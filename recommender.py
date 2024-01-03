@@ -6,6 +6,9 @@ from flask_user import login_required, UserManager, current_user
 from models import db, User, Movie, Rating
 from read_data import check_and_read_data
 
+import numpy as np
+from numpy.linalg import norm
+
 # Class-based application configuration
 class ConfigClass(object):
     """ Flask application config """
@@ -62,7 +65,7 @@ def movies_page():
     # String-based templates
 
     # first 10 movies
-    movies = Movie.query.limit(10).all()
+    movies = Movie.query.limit(20).all()
 
     # only Romance movies
     # movies = Movie.query.filter(Movie.genres.any(MovieGenre.genre == 'Romance')).limit(10).all()
@@ -100,6 +103,76 @@ def rate():
 
     return ("nothing?")
     #return render_template("rated.html", rating=rating)
+
+
+def cosineSim(A, B):
+    return np.dot(A,B)/(norm(A)*norm(B))
+
+
+@app.route('/recommend')
+@login_required
+def recommendation_test():
+    minAmount = 20
+
+    #all movies with minAmount of ratings in the database
+    relevant_movies = Movie.query\
+                    .filter(Movie.ratingCount > (minAmount-1)).all()
+    
+    #get all movieIDs
+    movieIDs = []
+    for movie in relevant_movies:
+        movieIDs.append(movie.id)
+
+    #get all UserIDs
+    users = User.query\
+            .filter(User.id != current_user.id).all()
+    
+    userIDs = []
+    for user in users:
+        userIDs.append(user.id)
+
+    #create rating-vector of currentUser
+    currentUser_vector = []
+    for movie in movieIDs:
+        #query to check whether there is already a rating for current user and movieid
+        q = db.session.query(Rating).filter((Rating.user_id == current_user.id) & (Rating.movie_id == movie))
+        if db.session.query(q.exists()).scalar():
+            #append rating of 0th element of query (in our case one & only element)
+            currentUser_vector.append(q[0].rating)
+        #if no rating in db, we append 0
+        else:
+            currentUser_vector.append(0)
+    
+    currentUser_vector = np.array(currentUser_vector)
+
+
+    userVectors = []
+    cosineSimilarities = []
+
+    count = 0
+
+    for user in userIDs:
+        userRatings = []
+        count += 1
+        for movie in movieIDs:
+            #query to check whether there is already a rating for current user and movieid
+            q = db.session.query(Rating).filter((Rating.user_id == user) & (Rating.movie_id == movie))
+            if db.session.query(q.exists()).scalar():
+                #append rating of 0th element of query (in our case one & only element)
+                userRatings.append(q[0].rating)
+            #if no rating in db, we append 0
+            else:
+                userRatings.append(0)
+        
+        userRatings = np.array(userRatings)
+        cosineSimilarities.append(cosineSim(userRatings, currentUser_vector))
+
+        userVectors.append(userRatings)
+        
+        if count % 100 == 0:
+            print(f"{count} userVectors created")
+
+    return (f"{cosineSimilarities}")
 
 # Start development web server
 if __name__ == '__main__':

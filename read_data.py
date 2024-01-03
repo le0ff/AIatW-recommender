@@ -140,7 +140,10 @@ def check_and_read_data(db):
                         .filter(Rating.movie_id == movie.id).all()
         
         ratingCount = len(current_ratings)
+        
+        #change ratingCount of current movie to amount of rating
         db.session.query(Movie).filter(Movie.id == movie.id).update({"ratingCount": ratingCount})
+        db.session.commit()
 
         if count % 100 == 0:
             print(count, " rating counts read")
