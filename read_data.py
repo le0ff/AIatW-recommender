@@ -126,24 +126,3 @@ def check_and_read_data(db):
             count += 1
             if count % 100 == 0:
                 print(count, " users read")
-    
-
-    #initialize the amount of ratings that exists for the movies
-    movies = Movie.query.all()
-    count = 0
-
-    #iterate over all movies
-    for movie in movies:
-        count += 1
-        #all ratings for current movie
-        current_ratings = Rating.query\
-                        .filter(Rating.movie_id == movie.id).all()
-        
-        ratingCount = len(current_ratings)
-        
-        #change ratingCount of current movie to amount of rating
-        db.session.query(Movie).filter(Movie.id == movie.id).update({"ratingCount": ratingCount})
-        db.session.commit()
-
-        if count % 100 == 0:
-            print(count, " rating counts read")

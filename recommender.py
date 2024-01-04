@@ -1,13 +1,15 @@
 # Contains parts from: https://flask-user.readthedocs.io/en/latest/quickstart_app.html
-
 from flask import Flask, render_template, request
 from flask_user import login_required, UserManager, current_user
+import numpy as np
+import random
 
 from models import db, User, Movie, Rating
 from read_data import check_and_read_data
+from Util import cosineSim, k_highest_argmax
 
-import numpy as np
-from numpy.linalg import norm
+
+
 
 # Class-based application configuration
 class ConfigClass(object):
@@ -76,7 +78,12 @@ def movies_page():
     #     .filter(Movie.genres.any(MovieGenre.genre == 'Horror')) \
     #     .limit(10).all()
 
-    return render_template("movies.html", movies=movies)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
+    data = Movie.query.paginate(page=page, per_page=per_page)
+    #movies=movies,
+    return render_template("movies.html",  data=data)
 
 
 @app.route('/rate', methods=['POST'])
@@ -105,31 +112,23 @@ def rate():
     #return render_template("rated.html", rating=rating)
 
 
-def cosineSim(A, B):
-    return np.dot(A,B)/(norm(A)*norm(B))
-
-
 @app.route('/recommend')
 @login_required
 def recommendation_test():
-    minAmount = 20
-
-    #all movies with minAmount of ratings in the database
-    relevant_movies = Movie.query\
-                    .filter(Movie.ratingCount > (minAmount-1)).all()
-    
-    #get all movieIDs
-    movieIDs = []
-    for movie in relevant_movies:
-        movieIDs.append(movie.id)
+    #all movies rated by current user
+    relevant_movies = Rating.query \
+                    .with_entities(Rating.movie_id) \
+                    .filter(Rating.user_id == current_user.id) \
+                    .all()
+    # relevant movieIDs to list
+    movieIDs = [movie_id for (movie_id,) in relevant_movies]
 
     #get all UserIDs
-    users = User.query\
+    users = User.query \
+            .with_entities(User.id) \
             .filter(User.id != current_user.id).all()
-    
-    userIDs = []
-    for user in users:
-        userIDs.append(user.id)
+    # userIDs to list
+    userIDs = [user_id for (user_id,) in users]
 
     #create rating-vector of currentUser
     currentUser_vector = []
@@ -144,7 +143,6 @@ def recommendation_test():
             currentUser_vector.append(0)
     
     currentUser_vector = np.array(currentUser_vector)
-
 
     userVectors = []
     cosineSimilarities = []
@@ -171,8 +169,46 @@ def recommendation_test():
         
         if count % 100 == 0:
             print(f"{count} userVectors created")
+    
+    # k indices, we add + 1 (element-wise) to convert from array indexing to userIDs
+    k = 3
+    matches = k_highest_argmax(k, cosineSimilarities) + 1
 
-    return (f"{cosineSimilarities}")
+    recommended_movieIDs = []
+    #iterate over our userIDs with highest matches
+    for userID in matches:
+        # initalize values for current User
+        selected_movies = []
+        ratingValue = 5.0
+        sampleSize = 3
+
+        # loop until either the observed ratings are too low (here 4.0)
+        while ((len(selected_movies) < sampleSize) & (ratingValue >= 4.0)):
+
+            # query for userID (selected match) and current ratingValue
+            best_movies = Rating.query \
+                    .with_entities(Rating.movie_id) \
+                    .filter((Rating.user_id == int(userID)) & (Rating.rating == ratingValue)).all()
+            
+            best_movieIDs = [movie_id for (movie_id,) in best_movies]
+            
+            #set of movies that have not been rated by our current_user in comparison to our current match
+            unseen_movieIDs = set(best_movieIDs) - set(movieIDs)
+
+            #
+            if len(unseen_movieIDs) >= (sampleSize - len(selected_movies)):
+                selected_movies.extend(random.sample(unseen_movieIDs, sampleSize - len(selected_movies)))
+            else:
+                selected_movies.extend(list(unseen_movieIDs))
+                ratingValue -= 0.5
+        
+        movieIDs.extend(selected_movies)
+        recommended_movieIDs.extend(selected_movies)
+
+        recommended_movies = Movie.query \
+                            .filter(Movie.id.in_(recommended_movieIDs)).all()
+
+    return render_template("movies.html", movies=recommended_movies)
 
 # Start development web server
 if __name__ == '__main__':
