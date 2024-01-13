@@ -2,7 +2,6 @@
 {% block content %}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <style>
         #half-stars {
             /* use display:inline-flex to prevent whitespace issues. alternatively, you can put all the children of .rating-group on a single line */
@@ -78,130 +77,14 @@
                 color: red;
             }            
         }
-
-        /* Pagination links */
-        .pagination a {
-            color: black;
-            float: left;
-            padding: 8px 16px;
-            text-decoration: none;
-            transition: background-color .3s;
-        }
-
-        /* Style the active/current link */
-        .pagination a.active {
-            background-color: dodgerblue;
-            color: white;
-        }
-
-        /* Add a grey background color on mouse-over */
-        .pagination a:hover:not(.active) {
-            background-color: #ddd;
-        }
-
-        .button {
-            background-color: #428bca; /* Hintergrundfarbe des Buttons */
-            color: #fbf2ea; /* Textfarbe des Buttons */
-            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
-            border-radius: 3px; /* Runde die Ecken des Buttons ab */
-            cursor: pointer; /* Zeigt an, dass der Button anklickbar ist */
-            touch-action: auto;
-            padding: 3px;
-            font-size: 1.2vw;
-            margin-left: 2px;
-        }
-
-        #searchbar {
-            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
-            border-radius: 3px; /* Runde die Ecken des Buttons ab */
-            font-size: 1.2vw;
-            padding: 3px;
-        }
-
-        .config {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .leftBlock {
-            width: 60%;
-            margin-left: 6%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rightBlock {
-            width: 30%;
-            margin-right: 6%;
-            margin-left: auto;
-        }
-
-        .leftBlock .input {
-            width: 60%; 
-            float: left;
-        }
-
-        .leftBlock .button {
-            width: 10%; 
-            float: left;
-        }
-
-        .rightBlock .button {
-            width: 33%;
-            float: right;
-        }
-
-        .grid-container {
-            width: 60.5%; 
-            display: grid;
-            grid-template-columns: auto auto auto auto auto auto;
-            margin-top: 2px;
-        }
-
-        .grid-item {
-            margin-top: 3px;
-            width: 95%;
-            font-size: 0.8vw;
-        }
-
-        .grid-item.active{
-            background-color: #428bca;
-            border: 1px solid black;
-            border-radius: 2px;
-        }
-
-        .container {
-            padding-top: 30px;
-            width: 90%;
-        }
-
     </style>
 </head>
 
-<div class="config">
-    <div class="leftBlock">
-        <div>
-            <form action="search" method="GET">
-                <input class="input" id="searchbar" type="search" name="searchinput" placeholder="Title...">
-                <button class="button" id="submitbutton" type="submit">Search!</button>
-            </form>
-        </div>
-        <div class="grid-container">
-            {% for g in genres %}
-                <button class="grid-item" id="gridbutton{{g}}">{{ g }}</button>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="rightBlock">
-        <button class="button" id="recommender">Recommender</button>
-        <button class="button" id="random">Random</button>
-    </div>
-</div>
 
 <div class="container">
     <h2>Movies</h2>
 
-    {% for m in data.items %}
+    {% for m in data %}
         <div class="panel panel-default">
             <div class="panel-heading"><b>{{ m.title }}</b></div>
             <div class="panel-body">
@@ -258,36 +141,6 @@
             </div>
         </div>
     {% endfor %}
-
-    <div class="text-center">
-        <div class="pagination">
-            {% if data.has_prev %}
-                <a href="?page=1">&laquo;&laquo;</a>
-                <a href="?page={{ data.prev_num }}">&laquo;</a>
-            {% else %}
-                <a href="">&laquo;&laquo;</a>
-                <a href="">&laquo;</a>
-            {% endif %}
-    
-            {% for page_num in data.iter_pages(left_edge=0, left_current=2, right_current=2, right_edge=0) %}
-                {% if page_num %}
-                    {% if page_num == data.page %}
-                        <a class="active" href="?page={{ page_num }}">{{ page_num }}</a>
-                    {% else %}
-                        <a href="?page={{ page_num }}">{{ page_num }}</a>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-    
-            {% if data.has_next %}
-                <a href="?page={{ data.next_num }}">&raquo;</a>
-                <a href="?page={{ data.pages }}">&raquo;&raquo;</a>
-            {% else %}
-                <a href="">&raquo;</a>
-                <a href="">&raquo;&raquo;</a>
-            {% endif %}
-        </div>
-    </div>
 </div>
 
 <!-- javascript from courseware -->
@@ -338,17 +191,6 @@
         //set checked attribute to true (marks the correct value/star as checked)
         current_input.setAttribute('checked', true);
     };
-
-    var btns = document.getElementsByClassName("grid-item");
-    for (var i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function() {
-            if (this.className.includes(" active")) {
-                this.className = this.className.replace(" active", "");
-            } else {
-                this.className += " active";
-            }
-        });
-    }
 </script>
 
 {% endblock %}

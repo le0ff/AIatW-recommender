@@ -59,6 +59,10 @@ def home_page():
     # render home.html template
     return render_template("home.html")
 
+@app.route('/overview')
+@login_required
+def overview():
+    return render_template("overview.html")
 
 # The Members page is only accessible to authenticated users via the @login_required decorator
 @app.route('/movies')
@@ -66,8 +70,11 @@ def home_page():
 def movies_page():
     # String-based templates
 
+    # List of genres
+    genres = ['Action', 'Adventure', 'Animation', 'Children\'s', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
+
     # first 10 movies
-    movies = Movie.query.limit(20).all()
+    movies = Movie.query.limit(10).all()
 
     # only Romance movies
     # movies = Movie.query.filter(Movie.genres.any(MovieGenre.genre == 'Romance')).limit(10).all()
@@ -79,11 +86,11 @@ def movies_page():
     #     .limit(10).all()
 
     page = request.args.get('page', 1, type=int)
-    per_page = 20
+    per_page = 10
 
     data = Movie.query.paginate(page=page, per_page=per_page)
     #movies=movies,
-    return render_template("movies.html",  data=data)
+    return render_template("movies.html",  data=data, genres=genres)
 
 
 @app.route('/rate', methods=['POST'])
@@ -208,7 +215,7 @@ def recommendation_test():
         recommended_movies = Movie.query \
                             .filter(Movie.id.in_(recommended_movieIDs)).all()
 
-    return render_template("movies.html", movies=recommended_movies)
+    return render_template("recommendation.html", data=recommended_movies)
 
 # Start development web server
 if __name__ == '__main__':

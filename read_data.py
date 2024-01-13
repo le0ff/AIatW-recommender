@@ -15,7 +15,7 @@ def check_and_read_data(db):
                     try:
                         id = row[0]
                         title = row[1]
-                        movie = Movie(id=id, title=title, ratingCount=0)
+                        movie = Movie(id=id, title=title)
                         db.session.add(movie)
                         genres = row[2].split('|')  # genres is a list of genres
                         for genre in genres:  # add each genre to the movie_genre table
