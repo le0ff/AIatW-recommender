@@ -37,7 +37,7 @@ db.create_all()  # create database if necessary
 user_manager = UserManager(app, db, User)  # initialize Flask-User management
 
 #number of entries per page
-per_page = 10
+per_page = 14
 # List of genres
 all_genres = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
@@ -173,7 +173,7 @@ def recommendation():
             print(f"{count} userVectors created")
     
     # k indices, we add + 1 (element-wise) to convert from array indexing to userIDs
-    k = 3
+    k = 4
     matches = k_highest_argmax(k, cosineSimilarities) + 1
 
     recommended_movieIDs = []

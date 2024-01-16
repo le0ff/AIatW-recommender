@@ -111,11 +111,20 @@
             margin-left: 2px;
         }
 
+        .button:hover {
+            background-color: #276aa4;
+        }
+
+        .button:active {
+            background-color: #6d9ec8;
+        }
+
         #searchbar {
             border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
             border-radius: 3px; /* Runde die Ecken des Buttons ab */
             font-size: 1.2vw;
             padding: 3px;
+            width:64.7%;
         }
 
         .config {
@@ -152,15 +161,15 @@
         }
 
         .grid-container {
-            width: 60.5%; 
+            width: 64.8%; 
             display: grid;
-            grid-template-columns: auto auto auto auto auto auto;
+            grid-template-columns: 15.83% 15.83% 15.83% 15.83% 15.83% 15.83%;
             margin-top: 2px;
+            column-gap: 1%;
         }
 
         .grid-item {
             margin-top: 3px;
-            width: 95%;
             font-size: 0.8vw;
         }
 
@@ -175,6 +184,20 @@
             width: 90%;
         }
 
+        .links {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-heading {
+            font-size: 18px;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: 50%  50% ;
+            column-gap: 20px;
+        }
     </style>
 </head>
 
@@ -198,10 +221,11 @@
 
 <div class="container">
     <h2>Movies</h2>
-
+    
+    <div class="movie-grid">
     {% for m in data.items %}
         <div class="panel panel-default">
-            <div class="panel-heading"><b>{{ m.title }}</b></div>
+                <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5 </p></div>
             <div class="panel-body">
                 <div class="col-md-11">
                     <p>
@@ -219,12 +243,14 @@
                     <!--a href="https://movielens.org/movies/{{m.links[0].movie_id}}">
                         <img src="https://th.bing.com/th?id=ODLS.872d2baf-7095-409f-9e3f-e7bf5c878a64&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2" width="50%" height="50%" alt="MovieLens">
                     </a-->
-                    <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
-                        <img src="https://img.icons8.com/color/48/000000/imdb.png" width="50%" height="50%" alt="IMDB">
-                    </a>
-                    <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
-                        <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="50%" height="50%" alt="TMDB">
-                    </a>
+                    <div class = "links">
+                        <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
+                            <img src="https://img.icons8.com/color/48/000000/imdb.png" width="45vw" height="45vw" alt="IMDB">
+                        </a>
+                        <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
+                            <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="45vw" height="45vw" alt="TMDB">
+                        </a>
+                     </div>
                 </div>
             </div>
 
@@ -256,6 +282,7 @@
             </div>
         </div>
     {% endfor %}
+    </div>
 
     <div class="text-center">
         <div class="pagination">

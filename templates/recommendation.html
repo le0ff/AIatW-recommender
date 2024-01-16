@@ -1,10 +1,10 @@
 {% block content %}
 <div>
     <h2>Recommendations</h2>
-
+    <div class="movie-grid">
     {% for m in data %}
         <div class="panel panel-default">
-            <div class="panel-heading"><b>{{ m.title }}</b></div>
+            <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5 </p></div>
             <div class="panel-body">
                 <div class="col-md-11">
                     <p>
@@ -22,12 +22,14 @@
                     <!--a href="https://movielens.org/movies/{{m.links[0].movie_id}}">
                         <img src="https://th.bing.com/th?id=ODLS.872d2baf-7095-409f-9e3f-e7bf5c878a64&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2" width="50%" height="50%" alt="MovieLens">
                     </a-->
-                    <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
-                        <img src="https://img.icons8.com/color/48/000000/imdb.png" width="50%" height="50%" alt="IMDB">
-                    </a>
-                    <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
-                        <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="50%" height="50%" alt="TMDB">
-                    </a>
+                    <div class = "links">
+                        <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
+                            <img src="https://img.icons8.com/color/48/000000/imdb.png" width="45vw" height="45vw" alt="IMDB">
+                        </a>
+                        <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
+                            <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="45vw" height="45vw" alt="TMDB">
+                        </a>
+                     </div>
                 </div>
             </div>
 
@@ -59,5 +61,6 @@
             </div>
         </div>
     {% endfor %}
+    </div>
 </div>
 {% endblock %}

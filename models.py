@@ -35,6 +35,7 @@ class Movie(db.Model):
     tags = db.relationship('Tag', backref='movie', lazy=True)
     links = db.relationship('Link', backref='movie', lazy=True)
     ratings = db.relationship('Rating', backref='movie', lazy=True)
+    avgratings = db.relationship('AVGRating', backref='movie', lazy=True)
 
 
 class MovieGenre(db.Model):
@@ -74,3 +75,10 @@ class Rating(db.Model):
     __table_args__ = (
         db.UniqueConstraint('user_id', 'movie_id', name='unique_user_movie'),
     )
+
+class AVGRating(db.Model):
+    __tablename__ = 'avgrating'
+    id = db.Column(db.Integer, primary_key=True)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=False)
+    avgrating = db.Column(db.Float, nullable=False, server_default='0.0')
+
