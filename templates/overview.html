@@ -1,0 +1,426 @@
+{% extends "flask_user_layout.html" %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        #half-stars {
+            /* use display:inline-flex to prevent whitespace issues. alternatively, you can put all the children of .rating-group on a single line */
+            .rating-group {
+                display: inline-flex;
+            }
+
+            /* make hover effect work properly in IE */
+            .rating__icon {
+                pointer-events: none;
+            }
+
+            /* hide radio inputs */
+            .rating__input {
+                position: absolute !important;
+                left: -9999px !important;
+            }
+
+            /* set icon padding and size */
+            .rating__label {
+                cursor: pointer;
+                /* if you change the left/right padding, update the margin-right property of .rating__label--half as well. */
+                padding: 0 0.1em;
+                font-size: 2rem;
+            }
+
+            /* add padding and positioning to half star labels */
+            .rating__label--half {
+                padding-right: 0;
+                margin-right: -0.6em;
+                z-index: 2;
+            }
+
+            /* set default star color */
+            .rating__icon--star {
+                color: orange;
+            }
+
+            /* set color of none icon when unchecked */
+            .rating__icon--none {
+                color: #eee;
+            }
+
+            /* if none icon is checked, make it red */
+            .rating__input--none:checked + .rating__label .rating__icon--none {
+                color: red;
+            }
+
+            /* if any input is checked, make its following siblings grey */
+            .rating__input:checked ~ .rating__label .rating__icon--star {
+                color: #ddd;
+            }
+
+            /* make all stars orange on rating group hover */
+            .rating-group:hover .rating__label .rating__icon--star,
+            .rating-group:hover .rating__label--half .rating__icon--star {
+                color: orange;
+            }
+
+            /* make hovered input's following siblings grey on hover */
+            .rating__input:hover ~ .rating__label .rating__icon--star,
+            .rating__input:hover ~ .rating__label--half .rating__icon--star {
+                color: #ddd;
+            }
+
+            /* make none icon grey on rating group hover */
+            .rating-group:hover .rating__input--none:not(:hover) + .rating__label .rating__icon--none {
+                color: #eee;
+            }
+
+            /* make none icon red on hover */
+            .rating__input--none:hover + .rating__label .rating__icon--none {
+                color: red;
+            }            
+        }
+
+        /* Pagination links */
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+        }
+
+        /* Style the active/current link */
+        .pagination a.active {
+            background-color: dodgerblue;
+            color: white;
+        }
+
+        /* Add a grey background color on mouse-over */
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+
+        .button {
+            background-color: #428bca; /* Hintergrundfarbe des Buttons */
+            color: #fbf2ea; /* Textfarbe des Buttons */
+            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
+            border-radius: 3px; /* Runde die Ecken des Buttons ab */
+            cursor: pointer; /* Zeigt an, dass der Button anklickbar ist */
+            touch-action: auto;
+            padding: 3px;
+            font-size: 1.2vw;
+            margin-left: 2px;
+        }
+
+        #searchbar {
+            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
+            border-radius: 3px; /* Runde die Ecken des Buttons ab */
+            font-size: 1.2vw;
+            padding: 3px;
+        }
+
+        .config {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .leftBlock {
+            width: 60%;
+            margin-left: 6%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rightBlock {
+            width: 30%;
+            margin-right: 6%;
+            margin-left: auto;
+        }
+
+        .leftBlock .input {
+            width: 60%; 
+            float: left;
+        }
+
+        .leftBlock .button {
+            width: 10%; 
+            float: left;
+        }
+
+        .rightBlock .button {
+            width: 33%;
+            float: right;
+        }
+
+        .grid-container {
+            width: 60.5%; 
+            display: grid;
+            grid-template-columns: auto auto auto auto auto auto;
+            margin-top: 2px;
+        }
+
+        .grid-item {
+            margin-top: 3px;
+            width: 95%;
+            font-size: 0.8vw;
+        }
+
+        .grid-item.active{
+            background-color: #428bca;
+            border: 1px solid black;
+            border-radius: 2px;
+        }
+
+        .container {
+            padding-top: 30px;
+            width: 90%;
+        }
+
+    </style>
+</head>
+
+<div class="config">
+    <div class="leftBlock">
+        <div>
+            <input class="input" id="searchbar" type="text" placeholder="Title...">
+            <button class="button" id="submitbutton">Search!</button>
+        </div>
+        <div class="grid-container">
+            {% for g in genres %}
+                <button class="grid-item" id="gridbutton{{g}}" name="{{g}}">{{ g }}</button>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="rightBlock">
+        <button class="button" id="recommender">Recommender</button>
+        <button class="button" id="random">Random</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Movies</h2>
+
+    {% for m in data.items %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>{{ m.title }}</b></div>
+            <div class="panel-body">
+                <div class="col-md-11">
+                    <p>
+                        {% for g in m.genres %}
+                            <span class="label label-default">{{ g.genre }}</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {% for t in m.tags %}
+                            <span class="label label-default">{{ t.tag }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <!--a href="https://movielens.org/movies/{{m.links[0].movie_id}}">
+                        <img src="https://th.bing.com/th?id=ODLS.872d2baf-7095-409f-9e3f-e7bf5c878a64&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2" width="50%" height="50%" alt="MovieLens">
+                    </a-->
+                    <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
+                        <img src="https://img.icons8.com/color/48/000000/imdb.png" width="50%" height="50%" alt="IMDB">
+                    </a>
+                    <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
+                        <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="50%" height="50%" alt="TMDB">
+                    </a>
+                </div>
+            </div>
+
+            <div class="panel-footer" id="half-stars">
+                <div class="rating-group" value="{{ m|get_rating() }}" name="rating{{ m.id }}">
+                    <input class="rating__input rating__input--none" name="rating{{ m.id }}" id="rating{{ m.id }}-0" value="0.0" type="radio" data-movieid="{{m.id}}" checked>
+                    <label aria-label="0 stars" class="rating__label" for="rating{{ m.id }}-0">&nbsp;</label>
+                    <label aria-label="0.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-05"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-05" value="0.5" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="1 star" class="rating__label" for="rating{{ m.id }}-10"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-10" value="1.0" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="1.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-15"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-15" value="1.5" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="2 stars" class="rating__label" for="rating{{ m.id }}-20"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-20" value="2.0" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="2.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-25"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-25" value="2.5" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="3 stars" class="rating__label" for="rating{{ m.id }}-30"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-30" value="3.0" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="3.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-35"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-35" value="3.5" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="4 stars" class="rating__label" for="rating{{ m.id }}-40"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-40" value="4.0" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="4.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-45"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-45" value="4.5" type="radio" data-movieid="{{m.id}}">
+                    <label aria-label="5 stars" class="rating__label" for="rating{{ m.id }}-50"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-50" value="5.0" type="radio" data-movieid="{{m.id}}">
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="text-center">
+        <div class="pagination">
+            {% if data.has_prev %}
+                <a href="?page=1">&laquo;&laquo;</a>
+                <a href="?page={{ data.prev_num }}">&laquo;</a>
+            {% else %}
+                <a href="">&laquo;&laquo;</a>
+                <a href="">&laquo;</a>
+            {% endif %}
+    
+            {% for page_num in data.iter_pages(left_edge=0, left_current=2, right_current=2, right_edge=0) %}
+                {% if page_num %}
+                    {% if page_num == data.page %}
+                        <a class="active" href="?page={{ page_num }}">{{ page_num }}</a>
+                    {% else %}
+                        <a href="?page={{ page_num }}">{{ page_num }}</a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+    
+            {% if data.has_next %}
+                <a href="?page={{ data.next_num }}">&raquo;</a>
+                <a href="?page={{ data.pages }}">&raquo;&raquo;</a>
+            {% else %}
+                <a href="">&raquo;</a>
+                <a href="">&raquo;&raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- javascript from courseware -->
+<script>
+    // Function to handle the click event on any rating link
+    function rateMovie(event) {
+        //event.preventDefault(); // Prevent the default anchor action
+
+        var movieid = this.getAttribute('data-movieid');
+        var rating = this.value;
+        //var elem = this;
+
+        // Create an AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/rate', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        // // Handle the response
+        // xhr.onload = function() {
+        //     if (xhr.status === 200) {
+        //         // Replace the entire div with the response
+        //         elem.parentElement.innerHTML = xhr.responseText;
+        //     } else {
+        //         alert('Request failed. Returned status of ' + xhr.status);
+        //     }
+        // };
+
+        // Send the request with the movie ID and the rating
+        xhr.send('movieid=' + movieid + '&rating=' + rating);
+    }
+
+    function reloadRatingJS(event) {
+        // Attach the event listener to each rating link
+        var inputs = document.querySelectorAll('.rating-group .rating__input');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('click', rateMovie);
+        };
+
+        //for correct display of stars for already rated movies
+        //get list of all "rating-containers"
+        var rating_container = document.querySelectorAll('.rating-group');
+        //for each rating-container, get name and value (value represents user-rating that should be displayed)
+        for (var i = 0; i < rating_container.length; i++) {
+            var current_name = rating_container[i].getAttribute('name');
+            var current_value = rating_container[i].getAttribute('value');
+            
+            //get element of class rating__input with name=current_name and value=current_value
+            var current_input = document.querySelector('.rating__input[name="' + current_name + '"][value="' + current_value + '"]');
+            //set checked attribute to true (marks the correct value/star as checked)
+            current_input.setAttribute('checked', true);
+        };
+    }
+
+    //function for search
+    function search() {
+        //get search prompt from searchbar
+        var searchPrompt = document.getElementById("searchbar").value;
+        //get all list of all names of gridbuttons that are active
+        var activeButtons = document.querySelectorAll('.grid-item.active');
+        //get all names of active gridbuttons
+        var genres = [];
+        for (var i = 0; i < activeButtons.length; i++) {
+            genres.push(activeButtons[i].getAttribute('name'));
+        };
+
+        // Create an AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/process_search', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        // xhr.onload = function() {
+        //     if (xhr.status == 200) {
+        //         //redirect to /search
+        //         window.location.href = '/search';
+        //     } else {
+        //         alert('Request failed. Returned status of ' + xhr.status);
+        //     }
+        // };
+
+        // var params = 'searchPrompt=' + encodeURIComponent(searchPrompt) + '&genres=' + encodeURIComponent(genres);
+        // xhr.send(params);
+
+        // var container = document.getElementsByClassName('container')
+        // xhr.onload = function() {
+        //     if (xhr.status == 200) {
+        //         //Replace the entire container (our main body) with response
+        //         container[0].innerHTML = xhr.responseText;
+
+        //         reloadRatingJS();
+
+        //     } else {
+        //         alert('Request failed. Returned status of ' + xhr.status);
+        //     }
+        // };
+
+        // Send the request with the movie ID and the rating
+        xhr.send('searchPrompt=' + searchPrompt + '&genres=' + genres);
+    }
+
+    function recommend(event) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/recommend', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        var container = document.getElementsByClassName('container')
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                //Replace the entire container (our main body) with response
+                container[0].innerHTML = xhr.responseText;
+
+                reloadRatingJS();
+
+            } else {
+                alert('Request failed. Returned status of ' + xhr.status);
+            }
+        };
+
+        xhr.send();
+    }
+
+    reloadRatingJS();
+
+    var btns = document.getElementsByClassName("grid-item");
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function() {
+            if (this.className.includes(" active")) {
+                this.className = this.className.replace(" active", "");
+            } else {
+                this.className += " active";
+            }
+        });
+    }
+
+    document.getElementById("submitbutton").addEventListener('click', search);
+    document.getElementById("recommender").addEventListener('click', recommend);
+</script>
+
+{% endblock %}

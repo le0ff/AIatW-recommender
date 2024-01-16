@@ -1,10 +1,10 @@
 # Contains parts from: https://flask-user.readthedocs.io/en/latest/quickstart_app.html
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flask_user import login_required, UserManager, current_user
 import numpy as np
 import random
 
-from models import db, User, Movie, Rating
+from models import db, User, Movie, Rating, MovieGenre
 from read_data import check_and_read_data
 from Util import cosineSim, k_highest_argmax
 
@@ -36,6 +36,10 @@ db.init_app(app)  # initialize database
 db.create_all()  # create database if necessary
 user_manager = UserManager(app, db, User)  # initialize Flask-User management
 
+#number of entries per page
+per_page = 10
+# List of genres
+all_genres = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
 @app.cli.command('initdb')
 def initdb_command():
@@ -59,22 +63,14 @@ def home_page():
     # render home.html template
     return render_template("home.html")
 
-@app.route('/overview')
-@login_required
-def overview():
-    return render_template("overview.html")
-
-# The Members page is only accessible to authenticated users via the @login_required decorator
+#The Members page is only accessible to authenticated users via the @login_required decorator
 @app.route('/movies')
 @login_required  # User must be authenticated
 def movies_page():
     # String-based templates
 
-    # List of genres
-    genres = ['Action', 'Adventure', 'Animation', 'Children\'s', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
-
     # first 10 movies
-    movies = Movie.query.limit(10).all()
+    #movies = Movie.query.limit(10).all()
 
     # only Romance movies
     # movies = Movie.query.filter(Movie.genres.any(MovieGenre.genre == 'Romance')).limit(10).all()
@@ -86,11 +82,10 @@ def movies_page():
     #     .limit(10).all()
 
     page = request.args.get('page', 1, type=int)
-    per_page = 10
 
     data = Movie.query.paginate(page=page, per_page=per_page)
     #movies=movies,
-    return render_template("movies.html",  data=data, genres=genres)
+    return render_template("overview.html",  data=data, genres=all_genres)
 
 
 @app.route('/rate', methods=['POST'])
@@ -119,9 +114,9 @@ def rate():
     #return render_template("rated.html", rating=rating)
 
 
-@app.route('/recommend')
+@app.route('/recommend', methods=['POST'])
 @login_required
-def recommendation_test():
+def recommendation():
     #all movies rated by current user
     relevant_movies = Rating.query \
                     .with_entities(Rating.movie_id) \
@@ -215,7 +210,77 @@ def recommendation_test():
         recommended_movies = Movie.query \
                             .filter(Movie.id.in_(recommended_movieIDs)).all()
 
+
     return render_template("recommendation.html", data=recommended_movies)
+
+
+"""we are trying to split the problem here in 2 parts: first, the backend receiving the content (process_search()),
+then the backend actually loading the page /search. This somehow is not working properly, but please feel free to also try other approaches
+The goal we want to achieve with the search buton is to entirely load the rendertemplate for the overview again, but with adjusted data
+so the pagination works properly. You can also try to fix the pagination problem while just replacing the main-container with the movies
+but this seemed to make problems.
+
+So ideally, we want to pass the searchPrompt and the genres from the javascript (in overview.html in the script part at the function "search")
+to the backend, process the data and then load another page (for example /search), so the filtered movies appear on a new page 
+so we hope that the pagination works properly, but obviously other approaches are welcome too, maybe you find something we did not
+think of yet (perhaps it is also with just one flask route (or method) possible).
+
+GaLiGrü
+"""
+
+@app.route('/process_search', methods=['POST'])
+@login_required  # User must be authenticated
+def process_search():
+    #get searchPrompt and genres
+    searchPrompt = request.form.get('searchPrompt')
+    genres = request.form.get('genres')
+    
+
+    #return ("nothing?")
+    #return render_template("movies.html", data=data)
+    return redirect(url_for('search', searchPrompt=searchPrompt, genres=genres, page=1))
+
+@app.route('/search')
+@login_required
+def search():
+    searchPrompt = request.args.get('searchPrompt')
+    genres = request.args.get('genres')
+    page = request.args.get('page', 1, type=int)
+    movieIDs = []
+
+    data = None
+
+    #if genres is not empty
+    if genres:
+        #split string into genres
+        genres = genres.split(",")
+        #get list of all movie ids that have one or more of the genres listed in genres
+        movieIDquery = db.session.query(MovieGenre.movie_id) \
+                    .filter(MovieGenre.genre.in_(genres)).all()
+        #movieIDs to set
+        movieIDs = set([movie_id for (movie_id,) in movieIDquery])
+    
+    print(genres)
+    print(movieIDs)
+
+    if searchPrompt and movieIDs:
+        data = Movie.query \
+                .filter(Movie.title.like(f"%{searchPrompt}%")) \
+                .filter(Movie.id.in_(movieIDs)).paginate(page=page, per_page=per_page)
+    
+    elif movieIDs:
+        data = Movie.query \
+                .filter(Movie.id.in_(movieIDs)).paginate(page=page, per_page=per_page)
+    
+    elif searchPrompt:
+        data = Movie.query \
+                .filter(Movie.title.like(f"%{searchPrompt}%")).paginate(page=page, per_page=per_page)
+        
+    else:
+        print(f"unfiltered search")
+
+    return render_template("overview.html", data=data, genres=all_genres)
+
 
 # Start development web server
 if __name__ == '__main__':
