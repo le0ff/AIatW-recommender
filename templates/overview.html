@@ -2,6 +2,7 @@
 {% block content %}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/8314/8314972.png" type="image/x-icon">
 
     <style>
         #half-stars {
@@ -124,7 +125,7 @@
             border-radius: 3px; /* Runde die Ecken des Buttons ab */
             font-size: 1.2vw;
             padding: 3px;
-            width:64.7%;
+            width: 64.7%;
         }
 
         .config {
@@ -220,14 +221,14 @@
 </div>
 
 <div class="container">
-    <h2>Movies</h2>
+    <h2>{{ title }}</h2>
     
     <div class="movie-grid">
     {% for m in data.items %}
         <div class="panel panel-default">
-                <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5 </p></div>
+                <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5.0 <i class="rating__icon--star fa fa-star" style="color: orange;"> </i> </p></div>
             <div class="panel-body">
-                <div class="col-md-11">
+                <div class="col-md-10">
                     <p>
                         {% for g in m.genres %}
                             <span class="label label-default">{{ g.genre }}</span>
@@ -239,10 +240,7 @@
                         {% endfor %}
                     </p>
                 </div>
-                <div class="col-md-1">
-                    <!--a href="https://movielens.org/movies/{{m.links[0].movie_id}}">
-                        <img src="https://th.bing.com/th?id=ODLS.872d2baf-7095-409f-9e3f-e7bf5c878a64&w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2" width="50%" height="50%" alt="MovieLens">
-                    </a-->
+                <div class="col-md-2">
                     <div class = "links">
                         <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
                             <img src="https://img.icons8.com/color/48/000000/imdb.png" width="45vw" height="45vw" alt="IMDB">
@@ -330,16 +328,6 @@
         xhr.open('POST', '/rate', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        // // Handle the response
-        // xhr.onload = function() {
-        //     if (xhr.status === 200) {
-        //         // Replace the entire div with the response
-        //         elem.parentElement.innerHTML = xhr.responseText;
-        //     } else {
-        //         alert('Request failed. Returned status of ' + xhr.status);
-        //     }
-        // };
-
         // Send the request with the movie ID and the rating
         xhr.send('movieid=' + movieid + '&rating=' + rating);
     }
@@ -373,43 +361,49 @@
         //get all list of all names of gridbuttons that are active
         var activeButtons = document.querySelectorAll('.grid-item.active');
         //get all names of active gridbuttons
-        var genres = [];
+        var activeGenres = [];
         for (var i = 0; i < activeButtons.length; i++) {
-            genres.push(activeButtons[i].getAttribute('name'));
+            activeGenres.push(activeButtons[i].getAttribute('name'));
         };
 
         // Create an AJAX request
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/process_search', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                //redirect to /search
+                window.location.href = '{{ url_for("search") }}';
+            } else {
+                alert('Request failed. Returned status of ' + xhr.status);
+            }
+        };
 
-        // xhr.onload = function() {
-        //     if (xhr.status == 200) {
-        //         //redirect to /search
-        //         window.location.href = '/search';
-        //     } else {
-        //         alert('Request failed. Returned status of ' + xhr.status);
-        //     }
-        // };
+        //pass searchPrompt and genres 
+        var params = 'searchPrompt=' + encodeURIComponent(searchPrompt) + '&genres=' + encodeURIComponent(activeGenres);
+        xhr.send(params);
+    }
 
-        // var params = 'searchPrompt=' + encodeURIComponent(searchPrompt) + '&genres=' + encodeURIComponent(genres);
-        // xhr.send(params);
+    function randomMovies(event) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/random', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        // var container = document.getElementsByClassName('container')
-        // xhr.onload = function() {
-        //     if (xhr.status == 200) {
-        //         //Replace the entire container (our main body) with response
-        //         container[0].innerHTML = xhr.responseText;
+        var container = document.getElementsByClassName('container')
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                //Replace the entire container (our main body) with response
+                container[0].innerHTML = xhr.responseText;
 
-        //         reloadRatingJS();
+                reloadRatingJS();
 
-        //     } else {
-        //         alert('Request failed. Returned status of ' + xhr.status);
-        //     }
-        // };
+            } else {
+                alert('Request failed. Returned status of ' + xhr.status);
+            }
+        };
 
-        // Send the request with the movie ID and the rating
-        xhr.send('searchPrompt=' + searchPrompt + '&genres=' + genres);
+        xhr.send();
     }
 
     function recommend(event) {
@@ -448,6 +442,7 @@
 
     document.getElementById("submitbutton").addEventListener('click', search);
     document.getElementById("recommender").addEventListener('click', recommend);
+    document.getElementById("random").addEventListener('click', randomMovies);
 </script>
 
 {% endblock %}
