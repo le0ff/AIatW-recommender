@@ -5,6 +5,7 @@ from models import Movie, MovieGenre, Link, Tag, Rating, User, AVGRating
 def check_and_read_data(db):
     # check if we have movies in the database
     # read data if database is empty
+    movieIDs = []
     if Movie.query.count() == 0:
         # read movies from csv
         with open('data/movies.csv', newline='', encoding='utf8') as csvfile:
@@ -14,6 +15,7 @@ def check_and_read_data(db):
                 if count > 0:
                     try:
                         id = row[0]
+                        movieIDs.append(id)
                         title = row[1]
                         movie = Movie(id=id, title=title)
                         db.session.add(movie)
@@ -129,37 +131,29 @@ def check_and_read_data(db):
 
 
     if AVGRating.query.count() == 0:
-        #read ratings from csv
-        with open('data/ratings.csv', newline='', encoding='utf8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            count = 0
-            movie_id_list = []
-            for row in reader:
-                if count > 0:
-                    try:
-                        movieID = row[1]
-                        if movieID in movie_id_list:
-                            pass
-                        else:
-                            movie_id_list.append(movieID)
-
-                            ratings = Rating.query \
-                                .with_entities(Rating.rating) \
-                                .filter( Rating.movie_id == movieID).all()
+        count = 0
+        for movieID in movieIDs:
+            try:
+                ratings = Rating.query \
+                    .with_entities(Rating.rating) \
+                    .filter( Rating.movie_id == movieID).all()
                             
-                            rating_list = [rating for (rating,) in ratings]
+                rating_list = [rating for (rating,) in ratings]
 
-                            average_rating = round(number = (sum(rating_list) / len(rating_list)), ndigits = 1)
-                            
-                            avgratings = AVGRating(movie_id = movieID, avgrating = average_rating)
-                            #add ratings and save to database
-                            db.session.add(avgratings)
-                            db.session.commit()
-                    except IntegrityError:
-                        print(f"Error: user:, movie: {movieID}, avgrating: {average_rating}")
-                        db.session.rollback()
-                        pass
-                count += 1
-                if count % 100 == 0:
-                    print(count, " avgratings read")
+                if (len(rating_list) == 0):
+                    avgratings = AVGRating(movie_id = movieID, avgrating = 0.0)
+                else:
+                    average_rating = round(number = (sum(rating_list) / len(rating_list)), ndigits = 1)          
+                    avgratings = AVGRating(movie_id = movieID, avgrating = average_rating)
+
+                #add ratings and save to database
+                db.session.add(avgratings)
+                db.session.commit()
+            except IntegrityError:
+                print(f"Error: user:, movie: {movieID}, avgrating: {average_rating}")
+                db.session.rollback()
+                pass
+            count += 1
+            if count % 100 == 0:
+                print(count, " avgratings read")
     
