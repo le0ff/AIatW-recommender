@@ -1,24 +1,32 @@
 {% block content %}
 <head>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/8314/8314972.png" type="image/x-icon">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1862/1862014.png" type="image/x-icon">
+    <style>
+        /* Setting variables for color scheme*/
+        :root {
+            --shadow: #2A3132;
+            --stone: #336B87;
+            --mist: #90AFC5;
+        }
+    </style>
 </head>
 
 <div>
-    <h2>{{ title }}</h2>
+    <h2 style="color: var(--stone);">{{ title }}</h2>
     <div class="movie-grid">
     {% for m in data %}
-        <div class="panel panel-default">
-            <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5.0 <i class="rating__icon--star fa fa-star" style="color: orange;"> </i></p></div>
+        <div class="panel panel-default" style="background-color: rgb(235, 235, 235); border-color: rgb(235, 235, 235); box-shadow: none;">
+            <div class="panel-heading" style="background-color: var(--stone); color: var(--mist);"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5.0 <i class="rating__icon--star fa fa-star" style="color: orange;"> </i></p></div>
             <div class="panel-body">
                 <div class="col-md-10">
                     <p>
                         {% for g in m.genres %}
-                            <span class="label label-default">{{ g.genre }}</span>
+                            <span class="label label-default" style="background-color: var(--stone); color: rgb(235, 235, 235);">{{ g.genre }}</span>
                         {% endfor %}
                     </p>
                     <p>
                         {% for t in m.tags %}
-                            <span class="label label-default">{{ t.tag }}</span>
+                            <span class="label label-default" style="background-color: var(--stone); color: rgb(235, 235, 235);">{{ t.tag }}</span>
                         {% endfor %}
                     </p>
                 </div>

@@ -2,10 +2,164 @@
 {% block content %}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/8314/8314972.png" type="image/x-icon">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1862/1862014.png" type="image/x-icon">
 
     <style>
+        :root {
+            --shadow: #2A3132;
+            --stone: #336B87;
+            --light_stone: #4482a1;
+            --mist: #90AFC5;
+        }
+
+        /* Background */
+        /* body, html { height: 100%; margin: 0px; } */
+        #bg {
+            /* background-image: url('https://th.bing.com/th/id/OIP.ml2T6xIFnfYxWGUGbOgMsQHaE8?w=281&h=187&c=7&r=0&o=5&dpr=1.5&pid=1.7'); */
+            background-color: rgb(235, 235, 235);
+            height: 100%;
+            background-position: center;
+            background-repeat: repeat-y;
+            background-size: cover;
+            
+        }
+
+        /* Layout adjustments */
+        #top-margins {
+            margin-top: 10px;
+        }
+
+        /* Separating page for Search/Buttons */
+        .leftBlock {
+            width: 60%;
+            margin-left: 6%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rightBlock {
+            width: 30%;
+            margin-right: 6%;
+            margin-left: auto;
+        }
+
+        .leftBlock .input {
+            width: 60%; 
+            float: left;
+        }
+
+        .leftBlock .button {
+            width: 10%; 
+            float: left;
+        }
+
+        .rightBlock .button {
+            width: 30%;
+            float: right;
+        }
+
+        .config {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Buttons */
+        .button {
+            background-color: var(--stone);
+            color: var(--mist);
+            border: 1px solid var(--mist); /* Entfernt die Standard-Border des Buttons */
+            border-radius: 3px; /* Runde die Ecken des Buttons ab */
+            cursor: pointer; /* Zeigt an, dass der Button anklickbar ist */
+            touch-action: auto;
+            padding: 3px;
+            font-size: 1.2vw;
+            margin-left: 2px;
+        }
+
+        .button:hover {
+            background-color: var(--light_stone);
+        }
+
+        .button:active {
+            background-color: var(--shadow);
+        }
+
+        /* Searchbar */
+        #searchbar {
+            background-color: var(--mist);
+            color: var(--stone);
+            border: 1px solid var(--stone); /* Entfernt die Standard-Border des Buttons */
+            border-radius: 3px; /* Runde die Ecken des Buttons ab */
+            font-size: 1.2vw;
+            padding: 3px;
+            width: 64.7%;
+        }
+
+        /* Grid for Genres */
+        .grid-container {
+            width: 64.8%; 
+            display: grid;
+            grid-template-columns: 15.83% 15.83% 15.83% 15.83% 15.83% 15.83%;
+            margin-top: 2px;
+            column-gap: 1%;
+        }
+
+        .grid-item {
+            background-color: var(--stone);
+            color: var(--mist);
+            border: 1px solid var(--mist);
+            border-radius: 3px;
+            margin-top: 3px;
+            font-size: 0.8vw;
+        }
+
+        .grid-item:hover {
+            background-color: var(--light_stone);
+        }
+
+        .grid-item.active {
+            background-color:var(--shadow);
+            border: 1px solid var(--mist);
+            border-radius: 3px;
+        }
+
+        .container {
+            padding-top: 30px;
+            width: 90%;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Movies */
+        .panel-heading {
+            font-size: 18px;
+        }
+
+        .panel-body {
+            background-color: var(--mist);
+            color: var(--mist);
+        }
+
+        .panel-footer {
+            background-color: var(--stone);
+            color: var(--mist);
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: 50%  50% ;
+            column-gap: 20px;
+        }
+
+        /* Half-stars for Movie rating */
         #half-stars {
+
+            background-color: var(--stone);
+            color: var(--mist);
+
             /* use display:inline-flex to prevent whitespace issues. alternatively, you can put all the children of .rating-group on a single line */
             .rating-group {
                 display: inline-flex;
@@ -82,7 +236,7 @@
 
         /* Pagination links */
         .pagination a {
-            color: black;
+            color: var(--stone);
             float: left;
             padding: 8px 16px;
             text-decoration: none;
@@ -91,224 +245,145 @@
 
         /* Style the active/current link */
         .pagination a.active {
-            background-color: dodgerblue;
-            color: white;
+            background-color: var(--mist);
+            color: var(--light_stone);
         }
 
-        /* Add a grey background color on mouse-over */
+        /* Add background color on hover */
         .pagination a:hover:not(.active) {
-            background-color: #ddd;
+            background-color: var(--light_stone);
         }
 
-        .button {
-            background-color: #428bca; /* Hintergrundfarbe des Buttons */
-            color: #fbf2ea; /* Textfarbe des Buttons */
-            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
-            border-radius: 3px; /* Runde die Ecken des Buttons ab */
-            cursor: pointer; /* Zeigt an, dass der Button anklickbar ist */
-            touch-action: auto;
-            padding: 3px;
-            font-size: 1.2vw;
-            margin-left: 2px;
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.3); 
+            /* border-top: 4px solid #428bca;  */
+            border-top: 4px solid var(--stone); 
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite; 
+            margin: 20px auto; 
         }
 
-        .button:hover {
-            background-color: #276aa4;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .button:active {
-            background-color: #6d9ec8;
-        }
-
-        #searchbar {
-            border: 1px solid rgb(0, 0, 0); /* Entfernt die Standard-Border des Buttons */
-            border-radius: 3px; /* Runde die Ecken des Buttons ab */
-            font-size: 1.2vw;
-            padding: 3px;
-            width: 64.7%;
-        }
-
-        .config {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .leftBlock {
-            width: 60%;
-            margin-left: 6%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rightBlock {
-            width: 30%;
-            margin-right: 6%;
-            margin-left: auto;
-        }
-
-        .leftBlock .input {
-            width: 60%; 
-            float: left;
-        }
-
-        .leftBlock .button {
-            width: 10%; 
-            float: left;
-        }
-
-        .rightBlock .button {
-            width: 33%;
-            float: right;
-        }
-
-        .grid-container {
-            width: 64.8%; 
-            display: grid;
-            grid-template-columns: 15.83% 15.83% 15.83% 15.83% 15.83% 15.83%;
-            margin-top: 2px;
-            column-gap: 1%;
-        }
-
-        .grid-item {
-            margin-top: 3px;
-            font-size: 0.8vw;
-        }
-
-        .grid-item.active{
-            background-color: #428bca;
-            border: 1px solid black;
-            border-radius: 2px;
-        }
-
-        .container {
-            padding-top: 30px;
-            width: 90%;
-        }
-
-        .links {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-heading {
-            font-size: 18px;
-        }
-
-        .movie-grid {
-            display: grid;
-            grid-template-columns: 50%  50% ;
-            column-gap: 20px;
-        }
     </style>
 </head>
 
-<div class="config">
-    <div class="leftBlock">
-        <div>
-            <input class="input" id="searchbar" type="text" placeholder="Title...">
-            <button class="button" id="submitbutton">Search!</button>
-        </div>
-        <div class="grid-container">
-            {% for g in genres %}
-                <button class="grid-item" id="gridbutton{{g}}" name="{{g}}">{{ g }}</button>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="rightBlock">
-        <button class="button" id="recommender">Recommender</button>
-        <button class="button" id="random">Random</button>
-    </div>
-</div>
-
-<div class="container">
-    <h2>{{ title }}</h2>
-    
-    <div class="movie-grid">
-    {% for m in data.items %}
-        <div class="panel panel-default">
-                <div class="panel-heading"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5.0 <i class="rating__icon--star fa fa-star" style="color: orange;"> </i> </p></div>
-            <div class="panel-body">
-                <div class="col-md-10">
-                    <p>
-                        {% for g in m.genres %}
-                            <span class="label label-default">{{ g.genre }}</span>
-                        {% endfor %}
-                    </p>
-                    <p>
-                        {% for t in m.tags %}
-                            <span class="label label-default">{{ t.tag }}</span>
-                        {% endfor %}
-                    </p>
-                </div>
-                <div class="col-md-2">
-                    <div class = "links">
-                        <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
-                            <img src="https://img.icons8.com/color/48/000000/imdb.png" width="45vw" height="45vw" alt="IMDB">
-                        </a>
-                        <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
-                            <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="45vw" height="45vw" alt="TMDB">
-                        </a>
-                     </div>
-                </div>
+<div id="bg">
+    <div class="config">
+        <div class="leftBlock" id="top-margins">
+            <div>
+                <input class="input" id="searchbar" type="text" placeholder="Title...">
+                <button class="button" id="submitbutton">Search!</button>
             </div>
-
-            <div class="panel-footer" id="half-stars">
-                <div class="rating-group" value="{{ m|get_rating() }}" name="rating{{ m.id }}">
-                    <input class="rating__input rating__input--none" name="rating{{ m.id }}" id="rating{{ m.id }}-0" value="0.0" type="radio" data-movieid="{{m.id}}" checked>
-                    <label aria-label="0 stars" class="rating__label" for="rating{{ m.id }}-0">&nbsp;</label>
-                    <label aria-label="0.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-05"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-05" value="0.5" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="1 star" class="rating__label" for="rating{{ m.id }}-10"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-10" value="1.0" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="1.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-15"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-15" value="1.5" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="2 stars" class="rating__label" for="rating{{ m.id }}-20"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-20" value="2.0" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="2.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-25"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-25" value="2.5" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="3 stars" class="rating__label" for="rating{{ m.id }}-30"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-30" value="3.0" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="3.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-35"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-35" value="3.5" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="4 stars" class="rating__label" for="rating{{ m.id }}-40"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-40" value="4.0" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="4.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-45"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-45" value="4.5" type="radio" data-movieid="{{m.id}}">
-                    <label aria-label="5 stars" class="rating__label" for="rating{{ m.id }}-50"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-                    <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-50" value="5.0" type="radio" data-movieid="{{m.id}}">
-                </div>
+            <div class="grid-container">
+                {% for g in genres %}
+                    <button class="grid-item" id="gridbutton{{g}}" name="{{g}}">{{ g }}</button>
+                {% endfor %}
             </div>
         </div>
-    {% endfor %}
+        <div class="rightBlock" id="top-margins">
+            <button class="button" id="recommender">Recommender</button>
+            <button class="button" id="random">Random</button>
+            <button class="button" id="myRatings">My Ratings</button>
+        </div>
     </div>
 
-    <div class="text-center">
-        <div class="pagination">
-            {% if data.has_prev %}
-                <a href="?page=1">&laquo;&laquo;</a>
-                <a href="?page={{ data.prev_num }}">&laquo;</a>
-            {% else %}
-                <a href="">&laquo;&laquo;</a>
-                <a href="">&laquo;</a>
-            {% endif %}
-    
-            {% for page_num in data.iter_pages(left_edge=0, left_current=2, right_current=2, right_edge=0) %}
-                {% if page_num %}
-                    {% if page_num == data.page %}
-                        <a class="active" href="?page={{ page_num }}">{{ page_num }}</a>
-                    {% else %}
-                        <a href="?page={{ page_num }}">{{ page_num }}</a>
-                    {% endif %}
+    <div class="container">
+        <h2 style="color: var(--stone);">{{ title }}</h2>
+        
+        <div class="movie-grid">
+        {% for m in data.items %}
+            <div class="panel panel-default" style="background-color: rgb(235, 235, 235); border-color: rgb(235, 235, 235); box-shadow: none;">
+                    <div class="panel-heading" style="background-color:var(--stone); color: var(--mist);"><p><b>{{ m.title }}</b> &nbsp;&nbsp;&nbsp; {{ m.avgratings[0].avgrating }}/5.0 <i class="rating__icon--star fa fa-star" style="color: orange;"> </i> </p></div>
+                <div class="panel-body">
+                    <div class="col-md-10">
+                        <p>
+                            {% for g in m.genres %}
+                                <span class="label label-default" style="background-color: var(--stone); color: rgb(235, 235, 235);">{{ g.genre }}</span>
+                            {% endfor %}
+                        </p>
+                        <p>
+                            {% for t in m.tags %}
+                                <span class="label label-default" style="background-color: var(--stone); color: rgb(235, 235, 235);">{{ t.tag }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="col-md-2">
+                        <div class = "links">
+                            <a href="http://www.imdb.com/title/tt{{m.links[0].imdb}}">
+                                <img src="https://img.icons8.com/color/48/000000/imdb.png" width="45vw" height="45vw" alt="IMDB">
+                            </a>
+                            <a href="https://www.themoviedb.org/movie/{{m.links[0].tmdb}}">
+                                <img src="https://img.icons8.com/?size=96&id=AxHFXpfUuWsm&format=png" width="45vw" height="45vw" alt="TMDB">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-footer" id="half-stars">
+                    <div class="rating-group" value="{{ m|get_rating() }}" name="rating{{ m.id }}">
+                        <input class="rating__input rating__input--none" name="rating{{ m.id }}" id="rating{{ m.id }}-0" value="0.0" type="radio" data-movieid="{{m.id}}" checked>
+                        <label aria-label="0 stars" class="rating__label" for="rating{{ m.id }}-0">&nbsp;</label>
+                        <label aria-label="0.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-05"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-05" value="0.5" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="1 star" class="rating__label" for="rating{{ m.id }}-10"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-10" value="1.0" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="1.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-15"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-15" value="1.5" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="2 stars" class="rating__label" for="rating{{ m.id }}-20"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-20" value="2.0" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="2.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-25"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-25" value="2.5" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="3 stars" class="rating__label" for="rating{{ m.id }}-30"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-30" value="3.0" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="3.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-35"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-35" value="3.5" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="4 stars" class="rating__label" for="rating{{ m.id }}-40"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-40" value="4.0" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="4.5 stars" class="rating__label rating__label--half" for="rating{{ m.id }}-45"><i class="rating__icon rating__icon--star fa fa-star-half"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-45" value="4.5" type="radio" data-movieid="{{m.id}}">
+                        <label aria-label="5 stars" class="rating__label" for="rating{{ m.id }}-50"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating{{ m.id }}" id="rating{{ m.id }}-50" value="5.0" type="radio" data-movieid="{{m.id}}">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <div class="pagination">
+                {% if data.has_prev %}
+                    <a href="?page=1">&laquo;&laquo;</a>
+                    <a href="?page={{ data.prev_num }}">&laquo;</a>
+                {% else %}
+                    <a href="">&laquo;&laquo;</a>
+                    <a href="">&laquo;</a>
                 {% endif %}
-            {% endfor %}
-    
-            {% if data.has_next %}
-                <a href="?page={{ data.next_num }}">&raquo;</a>
-                <a href="?page={{ data.pages }}">&raquo;&raquo;</a>
-            {% else %}
-                <a href="">&raquo;</a>
-                <a href="">&raquo;&raquo;</a>
-            {% endif %}
+        
+                {% for page_num in data.iter_pages(left_edge=0, left_current=2, right_current=2, right_edge=0) %}
+                    {% if page_num %}
+                        {% if page_num == data.page %}
+                            <a class="active" href="?page={{ page_num }}">{{ page_num }}</a>
+                        {% else %}
+                            <a href="?page={{ page_num }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+        
+                {% if data.has_next %}
+                    <a href="?page={{ data.next_num }}">&raquo;</a>
+                    <a href="?page={{ data.pages }}">&raquo;&raquo;</a>
+                {% else %}
+                    <a href="">&raquo;</a>
+                    <a href="">&raquo;&raquo;</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -402,6 +477,8 @@
                 alert('Request failed. Returned status of ' + xhr.status);
             }
         };
+        //replace the entire container (our main body) with loading gif
+        container[0].innerHTML = container[0].innerHTML = '<div id="loading-spinner" class="loading-spinner"></div>';
 
         xhr.send();
     }
@@ -423,7 +500,28 @@
                 alert('Request failed. Returned status of ' + xhr.status);
             }
         };
+        //replace the entire container (our main body) with loading gif
+        container[0].innerHTML = container[0].innerHTML = '<div id="loading-spinner" class="loading-spinner"></div>';
 
+        xhr.send();
+    }
+
+    function myRatings(event) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/forward_ratings', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        var container = document.getElementsByClassName('container')
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                //redirect to /myratings
+                window.location.href = '{{ url_for("myratings") }}';
+            } else {
+                alert('Request failed. Returned status of ' + xhr.status);
+            }
+        };
+
+        container[0].innerHTML = container[0].innerHTML = '<div id="loading-spinner" class="loading-spinner"></div>';
         xhr.send();
     }
 
@@ -443,6 +541,7 @@
     document.getElementById("submitbutton").addEventListener('click', search);
     document.getElementById("recommender").addEventListener('click', recommend);
     document.getElementById("random").addEventListener('click', randomMovies);
+    document.getElementById("myRatings").addEventListener('click', myRatings);
 </script>
 
 {% endblock %}

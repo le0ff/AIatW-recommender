@@ -1,12 +1,41 @@
 {% extends "flask_user_layout.html" %}
 {% block content %}
 <head>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/8314/8314972.png" type="image/x-icon">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1862/1862014.png" type="image/x-icon">
+    <style>
+        /* Setting variables for colors */
+        :root {
+            --shadow: #2A3132;
+            --stone: #336B87;
+            --light_stone: #4482a1;
+            --mist: #90AFC5;
+        }
+
+        /* Background */
+        body {
+            background-color: rgb(235, 235, 235);
+        }
+
+        .layout {
+            margin-left: 10px;
+        }
+
+        h2 {
+            color: var(--stone);
+        }
+
+        p {
+            color: var(--mist);
+        }
+
+    </style>
 </head>
+
+<div class="layout">
     <h2>Home page</h2>
     <p><a href={{ url_for('user.register') }}>Register</a></p>
     <p><a href={{ url_for('user.login') }}>Sign in</a></p>
-    <p><a href={{ url_for('home_page') }}>Home page</a> (accessible to anyone)</p>
     <p><a href={{ url_for('movies_page') }}>Movies</a> (login required)</p>
     <p><a href={{ url_for('user.logout') }}>Sign out</a></p>
+</div>
 {% endblock %}

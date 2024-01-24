@@ -41,6 +41,7 @@ per_page = 14
 # List of genres
 all_genres = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
+#initialization of database
 @app.cli.command('initdb')
 def initdb_command():
     global db
@@ -69,8 +70,10 @@ def home_page():
 @app.route('/movies')
 @login_required  # User must be authenticated
 def movies_page():
+    #set page to 1, (start page)
     page = request.args.get('page', 1, type=int)
 
+    #set up data object for pagination, consisting of all Movies
     data = Movie.query.paginate(page=page, per_page=per_page)
     return render_template("overview.html",  data=data, genres=all_genres, title="All Movies")
 
@@ -95,44 +98,53 @@ def rate():
         db.session.commit()
 
     #console output for now
-    print("Rate {} for {} by {}".format(rating, movieid, userid))
-
+    # print("Rate {} for {} by {}".format(rating, movieid, userid))
+    #return string to not replace something
     return ("nothing?")
 
 
+#route for random movies
 @app.route('/random', methods=['POST'])
 @login_required
 def randomMovie():
+    #get movieIDs for all movies rated by the user
     user_movies = Rating.query \
                     .with_entities(Rating.movie_id) \
-                    .filter(Rating.user_id == current_user.id) \
+                    .filter( (Rating.user_id == current_user.id) & (Rating.rating > 0.0)) \
                     .all()
     
-    # relevant movieIDs to list
+    # relevant movieIDs to set
     user_movieIDs = set([movie_id for (movie_id,) in user_movies])
 
+    #all movieIDs
     all_movies = Movie.query \
                 .with_entities(Movie.id).all()
     
+    #all movieIds to set
     all_movieIDs = set([movie_id for (movie_id,) in all_movies])
 
+    #subtract user_movieIDs from all_movieIDs
     possible_movies = all_movieIDs - user_movieIDs
 
+    #get 14 random movieIDs (for display reasons)
     rnd_possible_movieIDs = [random.choice(list(possible_movies)) for _ in range(14)]
 
+    #get random movies (Movie objects)
     rnd_possible_movies = Movie.query \
                         .filter(Movie.id.in_(rnd_possible_movieIDs)).all()
 
+    #render movies.html with random movies
     return render_template("movies.html", data=rnd_possible_movies, title='Random')
 
 
+#recommendation route
 @app.route('/recommend', methods=['POST'])
 @login_required
 def recommendation():
     #all movies rated by current user
     relevant_movies = Rating.query \
                     .with_entities(Rating.movie_id) \
-                    .filter(Rating.user_id == current_user.id) \
+                    .filter( (Rating.user_id == current_user.id) & (Rating.rating > 0.0) ) \
                     .all()
     # relevant movieIDs to list
     movieIDs = [movie_id for (movie_id,) in relevant_movies]
@@ -163,6 +175,7 @@ def recommendation():
 
     count = 0
 
+    #iterate over all userIDs
     for user in userIDs:
         userRatings = []
         count += 1
@@ -297,3 +310,33 @@ def search():
 
     #render overview with filtered movies
     return render_template("overview.html", data=data, genres=all_genres, title=title)
+
+
+#forwarding, this method worked out best for us eventhough we do realize it might not be the cleanest in this case
+@app.route('/forward_ratings', methods=['POST'])
+@login_required
+def forward_ratings():
+
+    return redirect(url_for('myratings'))
+
+
+#route for myRatings
+@app.route('/myratings')
+@login_required
+def myratings():
+    #get userID
+    userID = current_user.id
+    page = request.args.get('page', 1, type=int)
+
+    #get all movieIDs rated by current user
+    movieIDquery = db.session.query(Rating.movie_id) \
+                    .filter((Rating.user_id == userID) & (Rating.rating > 0.0) ).all()
+    #movieIDs to set
+    movieIDs = set([movie_id for (movie_id,) in movieIDquery])
+
+    #get all movies rated by current user
+    data = Movie.query \
+            .filter(Movie.id.in_(movieIDs)).paginate(page=page, per_page=per_page)
+
+    #render overview with filtered movies
+    return render_template("overview.html", data=data, genres=all_genres, title="My Ratings")
