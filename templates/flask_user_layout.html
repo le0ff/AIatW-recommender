@@ -64,7 +64,7 @@
 <body>
     {% block body %}
     <div id="header-div" class="clearfix">
-        <div class="pull-left"><a href="/"><img src="https://cdn-icons-png.flaticon.com/128/1862/1862014.png" style="height: 46%; width: 46%;margin-left: 25px;"></a></div>
+        <div class="pull-left"><a href={{ url_for('home_page') }}><img src="https://cdn-icons-png.flaticon.com/128/1862/1862014.png" style="height: 46%; width: 46%;margin-left: 25px;"></a></div>
         <div class="pull-right">
             {% if call_or_get(current_user.is_authenticated) %}
                 <a href="{{ url_for('user.edit_user_profile') }}">{{ current_user.username or current_user.email }}</a>

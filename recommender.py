@@ -28,6 +28,11 @@ class ConfigClass(object):
     USER_ENABLE_USERNAME = True  # Enable username authentication
     USER_REQUIRE_RETYPE_PASSWORD = True  # Simplify register form
 
+    USER_AFTER_REGISTER_ENDPOINT = 'home_page'
+    USER_AFTER_CONFIRM_ENDPOINT = 'home_page'
+    USER_AFTER_LOGIN_ENDPOINT = 'home_page'
+    USER_AFTER_LOGOUT_ENDPOINT = 'home_page'
+
 # Create Flask app
 app = Flask(__name__)
 app.config.from_object(__name__ + '.ConfigClass')  # configuration
@@ -104,9 +109,9 @@ def rate():
 
 
 #route for random movies
-@app.route('/random', methods=['POST'])
+@app.route('/random_movies', methods=['POST'])
 @login_required
-def randomMovie():
+def random_movies():
     #get movieIDs for all movies rated by the user
     user_movies = Rating.query \
                     .with_entities(Rating.movie_id) \
@@ -140,7 +145,7 @@ def randomMovie():
 #recommendation route
 @app.route('/recommend', methods=['POST'])
 @login_required
-def recommendation():
+def recommend():
     #all movies rated by current user
     relevant_movies = Rating.query \
                     .with_entities(Rating.movie_id) \
@@ -340,3 +345,7 @@ def myratings():
 
     #render overview with filtered movies
     return render_template("overview.html", data=data, genres=all_genres, title="My Ratings")
+
+# Start development web server
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)

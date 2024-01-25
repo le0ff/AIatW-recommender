@@ -400,7 +400,7 @@
 
         // Create an AJAX request
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/rate', true);
+        xhr.open('POST', '{{ url_for("rate") }}', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         // Send the request with the movie ID and the rating
@@ -443,7 +443,7 @@
 
         // Create an AJAX request
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/process_search', true);
+        xhr.open('POST', '{{ url_for("process_search") }}', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         
         xhr.onload = function() {
@@ -462,7 +462,7 @@
 
     function randomMovies(event) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/random', true);
+        xhr.open('POST', '{{ url_for("random_movies") }}', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         var container = document.getElementsByClassName('container')
@@ -485,7 +485,7 @@
 
     function recommend(event) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/recommend', true);
+        xhr.open('POST', '{{ url_for("recommend") }}', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         var container = document.getElementsByClassName('container')
@@ -508,7 +508,7 @@
 
     function myRatings(event) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/forward_ratings', true);
+        xhr.open('POST', '{{ url_for("forward_ratings") }}', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         
         var container = document.getElementsByClassName('container')
